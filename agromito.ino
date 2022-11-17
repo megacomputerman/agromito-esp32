@@ -1,6 +1,12 @@
+#include "DHT.h"
+
 #define MODE_MANUAL 0
 #define MODE_AUTO   1
 #define LED_BUILTIN 2
+
+//Added temperature sensor
+#define DHT_PIN 21
+#define DHTTYPE DHT11
 
 int ledPin = 23;
 int ledChannel = 0;
@@ -11,6 +17,9 @@ int ldrPin = 36;
 int ldrMax = 4000;
 
 int thresholdValue = 50;
+
+//create an instance of DHT sensor
+DHT dht(DHT_PIN, DHTTYPE);
 
 void setup() {
     Serial.begin(9600);
@@ -28,7 +37,9 @@ void setup() {
     ledcSetup(ledChannel, 5000, 8);
     ledcAttachPin(ledPin, ledChannel);
     
-    Serial.printf("DBG SmartLamp Initialized.\n");
+    //call begin to start sensor
+    dht.begin();
+    Serial.printf("DBG agromito Initialized.\n");
 }
 
  
@@ -84,10 +95,19 @@ void processCommand(String command) {
 
     else if (command == "GET_LDR")
       Serial.printf("RES GET_LDR %d\n", ldrGetValue());
-
+    //get temp
+    else if (command == "GET_TEMP"){
+        float myt = dht.readTemperature();
+        int mytt = round(myt);
+        Serial.printf("RES GET_TEMP %d\n", mytt);
+    }
+    else if (command == "GET_UMD"){
+        float myu = dht.readHumidity();
+        int myuu = round(myu);
+        Serial.printf("RES GET_UMD %d\n", myuu);
+    }
     else if (command == "GET_LED")
       Serial.printf("RES GET_LED %d\n", ledValue);
-    
     else if (command == "GET_THRESHOLD")
       Serial.printf("RES GET_THRESHOLD %d\n", thresholdValue);
     
